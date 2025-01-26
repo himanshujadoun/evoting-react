@@ -1,14 +1,15 @@
-import React, { Suspense, useEffect } from 'react';
 import { HashRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { connect } from 'react-redux';
 import Login from './views/Login/Login';
 import SignUp from './views/SignUp/SignUp';
+import VerificationPage from './views/VerificationPage/VerificationPage'; // Import the VerificationPage component
+import Vote from './views/Vote/Vote'; // Import the Vote component
 import { CSpinner, useColorModes } from '@coreui/react';
 import './scss/style.scss';
 import AppContent from './AppContent';
-
-const App = (props) => {
+import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
+import React, { Suspense, useEffect } from 'react';
+const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme');
   const storedTheme = useSelector((state) => state.theme);
 
@@ -36,6 +37,10 @@ const App = (props) => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-email" element={<VerificationPage />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/vote" element={<Vote />} /> {/* Protect Vote route */}
+          </Route>
           <Route path="*" element={<AppContent />} />
           <Route path="/" element={<Navigate to="/login" replace />} /> {/* Redirection */}
         </Routes>
@@ -44,9 +49,4 @@ const App = (props) => {
   );
 };
 
-function mapStateToProps(state) {
-  const { Header } = state; // Destructure header and theme from state
-  return { Header }; // Return header and theme as props
-}
-
-export default connect(mapStateToProps)(App);
+export default App;

@@ -13,7 +13,7 @@ const routes = [
   {
     path: '/vote',
     name: 'Vote',
-    element: React.lazy(() => import('./views/pages/Vote')),
+    element: React.lazy(() => import('./views/Vote/Vote')),
     protected: true, // Protect this route
   },
   {

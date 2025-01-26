@@ -15,11 +15,11 @@ body {
   height: 100vh;
 }
 
-.login-main {
+.signup-main {
   display: flex;
 }
 
-.login-left {
+.signup-left {
   flex-grow: 1;
   height: 100vh;
   background-color: #E9E9E9;
@@ -28,16 +28,16 @@ body {
   align-items: center;
 }
 
-.login-left img {
+.signup-left img {
   width: 400px;
 }
 
-.login-right {
+.signup-right {
   height: 100vh;
   flex-grow: 1;
 }
 
-.login-right-container {
+.signup-right-container {
   height: 100%;
   width: 80%;
   margin: 0 auto;
@@ -46,33 +46,33 @@ body {
   justify-content: center;
 }
 
-.login-right form {
+.signup-right form {
   display: flex;
   flex-direction: column;
 }
 
-.login-logo {
+.signup-logo {
   align-self: center;
   padding-top: 50px;
 }
 
-.login-center {
+.signup-center {
   margin: auto 0;
 }
 
-.login-logo img {
+.signup-logo img {
   width: 50px;
 }
 
-.login-center h2 {
+.signup-center h2 {
   font-size: 3.5rem;
 }
 
-.login-center {
+.signup-center {
   text-align: center;
 }
 
-.login-center p {
+.signup-center p {
   font-weight: 400;
   font-size: 2rem;
   margin-bottom: 40px;
@@ -113,52 +113,25 @@ form button[type='button'] {
   font-weight: 600;
 }
 
-.login-center-options {
-  display: flex;
-  justify-content: space-between;
-}
-
-.remember-div {
-  display: flex;
-  align-items: center;
-  column-gap: 5px;
-}
-
-.remember-div label {
-  font-size: 1.3rem;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 2px;
-}
-
-.forgot-pass-link {
-  text-decoration: none;
-  font-size: 1.3rem;
-}
-
-.forgot-pass-link:hover {
-  text-decoration: underline;
-}
-
-.login-center-buttons {
+.signup-center-buttons {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
   row-gap: 10px;
 }
 
-.login-center-buttons button:nth-child(1) {
+.signup-center-buttons button:nth-child(1) {
   background-color: black;
   color: white;
   border: 3px solid black;
 }
 
-.login-center-buttons button:nth-child(1):hover {
+.signup-center-buttons button:nth-child(1):hover {
   color: #333;
   background-color: white;
 }
 
-.login-center-buttons button:nth-child(2) {
+.signup-center-buttons button:nth-child(2) {
   background-color: #F0F0F0;
   display: flex;
   justify-content: center;
@@ -166,54 +139,44 @@ form button[type='button'] {
   column-gap: 10px;
 }
 
-.login-center-buttons button:nth-child(2) img {
+.signup-center-buttons button:nth-child(2) img {
   width: 30px;
 }
 
-.login-center-buttons button:nth-child(2):hover {
+.signup-center-buttons button:nth-child(2):hover {
   background-color: #c4c4c457;
 }
 
-.login-bottom-p {
+.signup-bottom-p {
   text-align: center;
   font-size: 1.5rem;
   padding-bottom: 40px;
 }
 
-.login-bottom-p a {
+.signup-bottom-p a {
   text-decoration: none;
   font-weight: 600;
 }
 
-.login-bottom-p a:hover {
+.signup-bottom-p a:hover {
   text-decoration: underline;
 }
 
 @media(max-width: 900px) {
-  .login-left {
+  .signup-left {
     display: none;
   }
 }
 
 @media(max-width: 370px) {
-  .login-center-options {
-    flex-direction: column;
-    align-items: center;
-    row-gap: 10px;
-  }
-
-  .login-center-buttons {
+  .signup-center-buttons {
     margin-top: 20px;
   }
-
-  .login-center h2 {
-    font-size: 3rem;
-  }
-
-  .login-center p {
+  .signup-center p {
     font-size: 1.5rem;
   }
 }
+
 .error-message {
   color: #dc3545;
   font-size: 1.3rem;
