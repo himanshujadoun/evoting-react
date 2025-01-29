@@ -7,14 +7,21 @@ const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid'); // For email verification token
-const cors = require('cors'); // Import cors
+const { v4: uuidv4 } = require('uuid');
+const cors = require('cors');
 
 const app = express();
+
+// CORS configuration
+app.use(cors({
+  origin: '*', // Allow all origins
+  credentials: true,
+}));
+
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('public'));
-app.use(cors());
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -24,6 +31,10 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
+app.use(cors({
+  origin: '*', // Allow all origins
+  credentials: true,
+}));
 db.connect(err => {
   if (err) throw err;
   console.log('Connected to MySQL');
@@ -109,38 +120,104 @@ app.post('/signup', async (req, res) => {
 });
 
 // Login route
+// app.post('/login', (req, res) => {
+//   const { email, password } = req.body;
+//   const sanitizedEmail = sanitizeInput(email);
+
+//   db.query('SELECT * FROM users WHERE email = ?', [sanitizedEmail], (err, results) => {
+//     if (err || results.length === 0) return res.status(401).json({ message: 'Invalid email or password' });
+//     const user = results[0];
+
+//     bcrypt.compare(password, user.password, (err, isMatch) => {
+//       if (err || !isMatch) return res.status(401).json({ message: 'Invalid email or password' });
+
+//       if (!user.verified) {
+//         return res.status(401).json({ message: 'Please verify your email before logging in' });
+//       }
+
+//       // Create a session or JWT token here
+//       res.status(200).json({ message: 'Login successful!', usermail: user.email });
+//     });
+//   });
+// });
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const sanitizedEmail = sanitizeInput(email);
 
   db.query('SELECT * FROM users WHERE email = ?', [sanitizedEmail], (err, results) => {
-    if (err || results.length === 0) return res.status(401).json({ message: 'Invalid email or password' });
+    if (err || results.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
     const user = results[0];
 
     bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err || !isMatch) return res.status(401).json({ message: 'Invalid email or password' });
+      if (err || !isMatch) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
 
       if (!user.verified) {
         return res.status(401).json({ message: 'Please verify your email before logging in' });
       }
 
       // Create a session or JWT token here
-      res.status(200).json({ message: 'Login successful!', userId: user.email });
+      res.status(200).json({ message: 'Login successful!', userId: user.id }); // Use user.id instead of user.email
     });
   });
 });
 
+app.get('/getParties', (req, res) => {
+  const sql = 'SELECT id, name, candidate_name, TO_BASE64(image) AS image FROM election_party';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      res.status(500).send('Error fetching parties');
+      return;
+    }
+    res.json(results);
+  });
+});
+
 // Middleware to protect routes
+
 const authenticateUser = (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized access' });
   }
-  // Verify the token here (use a library like jsonwebtoken)
-  // If verified, proceed to the next middleware or route handler
-  // If not verified, return an unauthorized response
   next();
 };
+
+
+app.post('/vote', (req, res) => {
+  const { userId, partyId } = req.body;
+
+  if (!userId || !partyId) {
+    return res.status(400).json({ message: 'User ID and Party ID are required.' });
+  }
+
+  // Check if the user has already voted
+  const checkVoteSql = 'SELECT * FROM votes WHERE user_id = ?';
+  db.query(checkVoteSql, [userId], (err, results) => {
+    if (err) {
+      console.error('Error checking vote status:', err); // Log error
+      return res.status(500).json({ message: 'Error checking vote status', error: err });
+    }
+
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'You have already voted!' });
+    }
+
+    // Record the vote
+    const voteSql = 'INSERT INTO votes (user_id, party_id) VALUES (?, ?)';
+    db.query(voteSql, [userId, partyId], (err) => {
+      if (err) {
+        console.error('Error recording vote:', err); // Log error
+        return res.status(500).json({ message: 'Error recording vote', error: err });
+      }
+      res.json({ message: 'Vote recorded successfully!' });
+    });
+  });
+});
 
 // Example protected route
 app.get('/protected-route', authenticateUser, (req, res) => {
@@ -245,7 +322,11 @@ app.get('/verify-email', (req, res) => {
   });
 });
 
-// Start the server
+// Fallback to serve index.html from the build folder if no other route matches
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

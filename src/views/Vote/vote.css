@@ -1,40 +1,47 @@
 .container {
-    text-align: center;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-  }
-  
-  .party-card {
-    border: 1px solid #ddd;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 10px;
-  }
-  
-  .party-card h2 {
-    margin: 0;
-  }
-  
-  .party-card img {
-    max-width: 100px;
-    margin: 10px 0;
-  }
-  
-  button {
-    padding: 10px 20px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .error-message {
-    color: red;
-  }
-  
+  text-align: center;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+
+.party-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 10px;
+}
+
+.party-card h2 {
+  margin: 0;
+}
+
+.party-card img {
+  max-width: 100px;
+  margin: 10px 0;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+}
+
+.success-message {
+  color: green;
+}
+
+.vote-error {
+  color: red; /* Style for vote error message */
+}

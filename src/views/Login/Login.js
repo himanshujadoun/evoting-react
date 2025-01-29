@@ -16,7 +16,7 @@ const Login = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [generalError, setGeneralError] = useState(""); // State for general error messages
-  const { loading, error, isUserValid } = useSelector((state) => state.userAuthentication); // Access loading and error state from Redux
+  const { loading, error, isUserValid } = useSelector((state) => state.userAuthentication);
 
   useEffect(() => {
     if (isUserValid) {
@@ -61,16 +61,20 @@ const Login = () => {
     return isValid;
   };
 
-  const userVerification = () => {
+  const userVerification = async () => {
     if (validate()) {
-      dispatch(getUserAuthentication(userDetails)).then((response) => {
-        if (response.payload && response.payload.message === "Login successful!") {
-          sessionStorage.setItem('userId', response.payload.userId); // Store user ID in session storage
+      try {
+        const response = await dispatch(getUserAuthentication(userDetails)).unwrap();
+        if (response.message === "Login successful!") {
+          console.log('Login successful, userId:', response.userId); // Debugging
+          sessionStorage.setItem('userId', response.userId); // Store user ID in session storage
           navigate("/vote");
-        } else if (response.error) {
+        } else {
           setGeneralError("Invalid email or password. Please try again.");
         }
-      });
+      } catch (error) {
+        setGeneralError("Invalid email or password. Please try again.");
+      }
     }
   };
 

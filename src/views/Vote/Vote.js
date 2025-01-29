@@ -1,65 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { HTTP_GET, HTTP_POST } from '../../https';
-import './vote.css';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchParties, submitVote } from './voteController'; // Import actions
+import './Vote.css';
 
 const Vote = () => {
-  const [parties, setParties] = useState([]);
+  const dispatch = useDispatch();
+  const { parties, loading, error, message } = useSelector((state) => state.vote);
   const [selectedParty, setSelectedParty] = useState(null);
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [voteError, setVoteError] = useState(''); // State to hold vote error message
 
   useEffect(() => {
-    const fetchParties = async () => {
-      try {
-        const url = `${process.env.REACT_APP_API_BASE_URL}/getParties`; // Use environment variable for API base URL
-        const response = await HTTP_GET(url);
-        setParties(response.data);
-        setLoading(false);
-      } catch (error) {
-        setError('Error fetching parties: ' + error.message);
-        setLoading(false);
-      }
-    };
-
-    fetchParties();
-  }, []);
+    dispatch(fetchParties()); // Fetch parties when the component mounts
+  }, [dispatch]);
 
   const handleVote = async () => {
-    try {
-      const userId = localStorage.getItem('userId');
-      const url = `${process.env.REACT_APP_API_BASE_URL}/vote`; // Use environment variable for API base URL
-      const response = await HTTP_POST(url, { userId, partyId: selectedParty });
-      setMessage(response.data.message);
-    } catch (error) {
-      setError('Error submitting vote: ' + error.message);
+    const userId = sessionStorage.getItem('userId'); // Retrieve userId from sessionStorage
+    console.log('userId:', userId); // Debugging
+    console.log('selectedParty:', selectedParty); // Debugging
+
+    if (userId && selectedParty) {
+      try {
+        const response = await dispatch(submitVote({ userId, partyId: selectedParty })).unwrap();
+        console.log('response:', response); // Debugging
+        if (response.message === "You have already voted!") {
+          alert("You have already cast your vote!"); // Show an alert popup
+          setVoteError("You have already cast your vote!"); // Display vote error message in red text
+        } else {
+          setVoteError(''); // Clear any previous vote error message
+        }
+      } catch (error) {
+        console.error('Vote submission error:', error); // Debugging
+        if (error.response?.status === 9999) {
+          setVoteError("You have already cast your vote!"); // Handle custom status code 9999
+          alert("You have already cast your vote!"); // Show an alert popup
+        } else if (error.response?.status === 400) {
+          setVoteError(error.response.data.message || "You Already Voted!"); // Handle 400 status error
+          alert(error.response.data.message || "You Already Voted!"); // Show an alert popup for 400 status
+        } else {
+          setVoteError("You Already Voted!"); // Handle general errors
+          alert('You Already Voted!');
+        }
+      }
+    } else {
+      alert('Please select a party to vote and make sure you are logged in.');
     }
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem('userId'); // Remove userId from sessionStorage
+    window.location.href = '/login';
   };
 
   return (
     <div className="container">
-      <h1>Vote</h1>
+      <h1>Cast Your Vote</h1>
       {loading && <p>Loading parties...</p>}
       {error && <p className="error-message">{error}</p>}
-      <div>
+      {message && <p className="success-message">{message}</p>}
+      {voteError && <p className="vote-error">{voteError}</p>} {/* Display vote error message */}
+      <div id="partyList">
         {parties.map((party) => (
           <div key={party.id} className="party-card">
-            <h2>{party.name}</h2>
-            <p>{party.candidate_name}</p>
-            <img src={`data:image/jpeg;base64,${party.image}`} alt={party.name} />
-            <button
-              onClick={() => setSelectedParty(party.id)}
-              disabled={selectedParty === party.id}
-            >
-              {selectedParty === party.id ? 'Selected' : `Vote for ${party.name}`}
-            </button>
+            <input 
+              type="radio" 
+              name="party" 
+              value={party.id} 
+              id={`party${party.id}`} 
+              onChange={() => setSelectedParty(party.id)}
+            />
+            <label htmlFor={`party${party.id}`}>
+              <h2>{party.name}</h2>
+              <p>Candidate: {party.candidate_name || 'Not Available'}</p>
+              <img src={`data:image/jpeg;base64,${party.image}`} alt={party.name} width="200" />
+            </label>
           </div>
         ))}
       </div>
-      <button onClick={handleVote} disabled={!selectedParty || loading}>
-        Submit Vote
-      </button>
-      {message && <p>{message}</p>}
+      <button onClick={handleVote} disabled={loading}>Submit Vote</button>
+      <button onClick={logout}>Logout</button>
     </div>
   );
 };

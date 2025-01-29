@@ -5,26 +5,33 @@ const getToken = () => {
   return sessionStorage.getItem("FullToken");
 };
 
-// Function to perform a GET request
+// Create an instance of axios with the base URL
+const apiClient = axios.create({
+  baseURL: process.env.REACT_APP_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
+// Function to perform a GET request
 const HTTP_GET = async (url, params = {}, additionalHeaders = {}) => {
-    try {
-      const token = getToken();
-      const headers = {
-        ...additionalHeaders,
-        Authorization: `Bearer ${token}`,
-      };
-      const response = await axios.get(url, {
-        params,
-        headers,
-        responseType: headers.responseType || "json",
-      });
-      return response;
-    } catch (error) {
-      console.error("Error with GET request:", error);
-      throw error;
-    }
-  };
+  try {
+    const token = getToken();
+    const headers = {
+      ...additionalHeaders,
+      Authorization: `Bearer ${token}`,
+    };
+    const response = await apiClient.get(url, {
+      params,
+      headers,
+      responseType: headers.responseType || "json",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error with GET request:", error);
+    throw error;
+  }
+};
 
 // Function to perform a POST request
 const HTTP_POST = async (url, data, additionalHeaders = {}) => {
@@ -34,7 +41,7 @@ const HTTP_POST = async (url, data, additionalHeaders = {}) => {
       ...additionalHeaders,
       Authorization: `Bearer ${token}`,
     };
-    const response = await axios.post(url, data, { headers });
+    const response = await apiClient.post(url, data, { headers });
     return response;
   } catch (error) {
     console.error("Error with POST request:", error);
@@ -50,7 +57,7 @@ const HTTP_DELETE = async (url, params = {}, additionalHeaders = {}) => {
       ...additionalHeaders,
       Authorization: `Bearer ${token}`,
     };
-    const response = await axios.delete(url, {
+    const response = await apiClient.delete(url, {
       data: params,
       headers,
     });
@@ -69,7 +76,7 @@ const HTTP_PUT = async (url, data, additionalHeaders = {}) => {
       ...additionalHeaders,
       Authorization: `Bearer ${token}`,
     };
-    const response = await axios.put(url, data, { headers });
+    const response = await apiClient.put(url, data, { headers });
     return response;
   } catch (error) {
     console.error("Error with PUT request:", error);

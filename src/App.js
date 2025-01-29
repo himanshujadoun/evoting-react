@@ -1,3 +1,5 @@
+import { Provider } from 'react-redux';
+import store from './store';
 import { HashRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Login from './views/Login/Login';
@@ -9,6 +11,7 @@ import './scss/style.scss';
 import AppContent from './AppContent';
 import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
 import React, { Suspense, useEffect } from 'react';
+
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme');
   const storedTheme = useSelector((state) => state.theme);
@@ -26,26 +29,28 @@ const App = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <HashRouter>
-      <Suspense
-        fallback={
-          <div className="pt-3 text-center">
-            <CSpinner color="primary" variant="grow" />
-          </div>
-        }
-      >
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/verify-email" element={<VerificationPage />} />
-          <Route element={<PrivateRoute />}>
-            <Route path="/vote" element={<Vote />} /> {/* Protect Vote route */}
-          </Route>
-          <Route path="*" element={<AppContent />} />
-          <Route path="/" element={<Navigate to="/login" replace />} /> {/* Redirection */}
-        </Routes>
-      </Suspense>
-    </HashRouter>
+    <Provider store={store}>
+      <HashRouter>
+        <Suspense
+          fallback={
+            <div className="pt-3 text-center">
+              <CSpinner color="primary" variant="grow" />
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/verify-email" element={<VerificationPage />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/vote" element={<Vote />} /> {/* Protect Vote route */}
+            </Route>
+            <Route path="*" element={<AppContent />} />
+            <Route path="/" element={<Navigate to="/login" replace />} /> {/* Redirection */}
+          </Routes>
+        </Suspense>
+      </HashRouter>
+    </Provider>
   );
 };
 
