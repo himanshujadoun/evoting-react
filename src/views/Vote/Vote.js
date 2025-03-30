@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchParties, submitVote } from './voteController'; // Import actions
-import './Vote.css';
+import './vote.css';
 
 const Vote = () => {
   const dispatch = useDispatch();
