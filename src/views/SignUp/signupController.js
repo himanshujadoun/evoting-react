@@ -6,7 +6,7 @@ export const signUpUser = createAsyncThunk(
   
   "user/signup",
   async (userDetails) => {
-    let url =  `${process.env.REACT_APP_API_BASE_URL}/signup` 
+    let url =  `${process.env.REACT_APP_API_BASE_URL}/auth/signup` 
     try {
       const response = await axios.post(
        url, // Use environment variable for API base URL

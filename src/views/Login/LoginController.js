@@ -16,7 +16,7 @@ export const getUserAuthentication = createAsyncThunk(
     console.log(loginDetails); // Contains login ID or password entered by user, send this to API as payload
     try {
       const response = await HTTP_POST(
-        `${process.env.REACT_APP_API_BASE_URL}/login`, // Use environment variable for API base URL
+        `${process.env.REACT_APP_API_BASE_URL}/auth/login`, // Use environment variable for API base URL
         {
           email: loginDetails.email,
           password: loginDetails.password,
@@ -53,13 +53,27 @@ const userAuthenticationReducer = createSlice({
       state.error = "";
       state.isUserValid = false;
     });
+    // builder.addCase(getUserAuthentication.fulfilled, (state, action) => {
+    //   if (action.payload.message === "Login successful!") {
+    //     state.loading = false;
+    //     state.isUserValid = true;
+    //     state.error = "";
+    //     state.token = action.payload.token;
+    //     sessionStorage.setItem("userId", action.payload.userId); // Store user ID in session storage
+    //   } else {
+    //     state.loading = false;
+    //     state.isUserValid = false;
+    //     state.error = "Invalid credentials or email not verified";
+    //     state.token = "";
+    //   }
+    // });
     builder.addCase(getUserAuthentication.fulfilled, (state, action) => {
-      if (action.payload.message === "Login successful!") {
+      if (action.payload.message === "Login successful") {
         state.loading = false;
         state.isUserValid = true;
         state.error = "";
-        state.token = action.payload.token;
-        sessionStorage.setItem("userId", action.payload.userId); // Store user ID in session storage
+        state.token = action.payload.token || ""; // In case token is added later
+        sessionStorage.setItem("userId", action.payload.userId); // Store user ID
       } else {
         state.loading = false;
         state.isUserValid = false;
@@ -67,6 +81,7 @@ const userAuthenticationReducer = createSlice({
         state.token = "";
       }
     });
+
     builder.addCase(getUserAuthentication.rejected, (state, action) => {
       state.loading = false;
       state.isUserValid = false;

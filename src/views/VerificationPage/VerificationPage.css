@@ -1,42 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-html {
-  font-size: 10px;
-}
-
-body {
-  font-family: "Poppins", sans-serif;
-  height: 100vh;
-}
-
-.verification-main {
+.verification-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  background: #f8f9fa;
+  font-family: Arial, sans-serif;
 }
 
-.verification-container {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.verification-card {
+  background: white;
+  padding: 40px;
+  max-width: 480px;
+  width: 100%;
   text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
 }
 
-.verification-container h2 {
-  font-size: 3.5rem;
+.logo {
+  width: 50px;
   margin-bottom: 20px;
 }
 
-.verification-container p {
-  font-size: 1.8rem;
-  color: #333;
+.verify-icon {
+  width: 60px;
+  margin: 20px 0;
+}
+
+.login-button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.login-button:hover {
+  background-color: #0056b3;
+}
+
+.footer-note {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
 }

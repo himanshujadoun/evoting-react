@@ -45,3 +45,11 @@ button:disabled {
 .vote-error {
   color: red; /* Style for vote error message */
 }
+/* vote.css */
+.custom-card {
+  transition: transform 0.3s ease;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+}

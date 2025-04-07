@@ -1,92 +1,96 @@
-// const express = require('express');
-// const webpack = require('webpack');
-// const webpackDevMiddleware = require('webpack-dev-middleware');
-// const app = express();
-
-// // Load Create React App's Webpack config
-// const webpackConfig = require('react-scripts/config/webpack.config')('development');
-// const compiler = webpack(webpackConfig);
-
-// // Use Webpack Dev Middleware to serve React app
-// app.use(
-//   webpackDevMiddleware(compiler, {
-//     publicPath: webpackConfig.output.publicPath,
-//   })
-// );
-
-// // Example API route
-// app.get('/api/test', (req, res) => {
-//   res.json({ message: 'Backend works! after' });
-// });
-
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
-// });
-
-
 const express = require('express');
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const swaggerJsDoc = require('swagger-jsdoc');
+const mysql = require('mysql2');
+const multer = require('multer');
+const cors = require('cors');
+const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const app = express();
+const PORT = 8000;
 
-// Load Create React App's Webpack config
-const webpackConfig = require('react-scripts/config/webpack.config')('development');
-const compiler = webpack(webpackConfig);
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Use Webpack Dev Middleware to serve React app
-app.use(
-  webpackDevMiddleware(compiler, {
-    publicPath: webpackConfig.output.publicPath,
-  })
-);
+// MySQL connection
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'admin@123',
+  database: 'evoting_db',
+});
 
-// Swagger Configuration
+// Multer config to handle file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Swagger setup
 const swaggerOptions = {
-  swaggerDefinition: {
+  definition: {
     openapi: "3.0.0",
     info: {
-      title: "Evoting API",
+      title: "eVoting API",
       version: "1.0.0",
-      description: "API documentation for the Evoting system",
-      contact: {
-        name: "Developer",
-      },
+      description: "API for managing election parties",
     },
     servers: [
       {
-        url: "http://localhost:3000",
+        url: "http://localhost:8000",
       },
     ],
   },
-  apis: ["./server.js"], // Path to API routes
+  apis: ["./server1.js"], // <-- change this to your actual file if it's not "server.js"
 };
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Example API route
 /**
  * @swagger
- * /api/test:
- *   get:
- *     summary: Test API
- *     description: Returns a simple JSON message
+ * /api/party:
+ *   post:
+ *     summary: Add a new election party
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Demo Party
+ *               candidate_name:
+ *                 type: string
+ *                 example: John Doe
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
- *         description: Success
+ *         description: Party added successfully
  */
+app.post('/api/party', upload.single('image'), (req, res) => {
+  const { name, candidate_name } = req.body;
+  const image = req.file?.buffer;
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Backend works! after' });
+  if (!name || !candidate_name || !image) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const sql = 'INSERT INTO election_party (name, candidate_name, image) VALUES (?, ?, ?)';
+  db.query(sql, [name, candidate_name, image], (err, result) => {
+    if (err) {
+      console.error("DB Error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.status(200).json({ message: "Party added successfully", partyId: result.insertId });
+  });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Swagger Docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`📘 Swagger docs available at http://localhost:${PORT}/api-docs`);
 });

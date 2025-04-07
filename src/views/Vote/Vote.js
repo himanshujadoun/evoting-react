@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchParties, submitVote } from './voteController'; // Import actions
-import './vote.css';
+import { fetchParties, submitVote } from './voteController';
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Alert,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Card,
+  CardMedia,
+  CardContent,
+  Button,
+  Grid,
+  Box,
+} from '@mui/material';
+import './vote.css'; // Optional: Keep custom CSS if needed for additional styling
 
 const Vote = () => {
   const dispatch = useDispatch();
@@ -24,7 +39,7 @@ const Vote = () => {
         console.log('response:', response); // Debugging
         if (response.message === "You have already voted!") {
           alert("You have already cast your vote!"); // Show an alert popup
-          setVoteError("You have already cast your vote!"); // Display vote error message in red text
+          setVoteError("You have already cast your vote!"); // Display vote error message
         } else {
           setVoteError(''); // Clear any previous vote error message
         }
@@ -52,33 +67,92 @@ const Vote = () => {
   };
 
   return (
-    <div className="container">
-      <h1>Cast Your Vote</h1>
-      {loading && <p>Loading parties...</p>}
-      {error && <p className="error-message">{error}</p>}
-      {message && <p className="success-message">{message}</p>}
-      {voteError && <p className="vote-error">{voteError}</p>} {/* Display vote error message */}
-      <div id="partyList">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h2" align="center" gutterBottom color="primary">
+        Cast Your Vote
+      </Typography>
+      {loading && (
+        <Box display="flex" justifyContent="center" my={2}>
+          <CircularProgress />
+        </Box>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ my: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {message && (
+        <Alert severity="success" sx={{ my: 2 }}>
+          {message}
+        </Alert>
+      )}
+      {voteError && (
+        <Alert severity="error" sx={{ my: 2 }}>
+          {voteError}
+        </Alert>
+      )}
+      <Grid container spacing={3} justifyContent="center">
         {parties.map((party) => (
-          <div key={party.id} className="party-card">
-            <input 
-              type="radio" 
-              name="party" 
-              value={party.id} 
-              id={`party${party.id}`} 
-              onChange={() => setSelectedParty(party.id)}
-            />
-            <label htmlFor={`party${party.id}`}>
-              <h2>{party.name}</h2>
-              <p>Candidate: {party.candidate_name || 'Not Available'}</p>
-              <img src={`data:image/jpeg;base64,${party.image}`} alt={party.name} width="200" />
-            </label>
-          </div>
+          <Grid item xs={12} sm={6} md={4} key={party.id}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'translateY(-5px)' },
+              }}
+            >
+              <CardMedia
+                component="img"
+                height="200"
+                image={`data:image/jpeg;base64,${party.image}`}
+                alt={party.name}
+                sx={{ objectFit: 'cover', borderRadius: '8px 8px 0 0' }}
+              />
+              <CardContent sx={{ flexGrow: 1 }}>
+                <RadioGroup
+                  value={selectedParty}
+                  onChange={(e) => setSelectedParty(e.target.value)}
+                  sx={{ mb: 2 }}
+                >
+                  <FormControlLabel
+                    value={party.id}
+                    control={<Radio />}
+                    label={
+                      <Typography variant="h6" component="span">
+                        {party.name}
+                      </Typography>
+                    }
+                  />
+                </RadioGroup>
+                <Typography variant="body2" color="text.secondary">
+                  Candidate: {party.candidate_name || 'Not Available'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
-      <button onClick={handleVote} disabled={loading}>Submit Vote</button>
-      <button onClick={logout}>Logout</button>
-    </div>
+      </Grid>
+      <Box mt={4} display="flex" justifyContent="center" gap={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleVote}
+          disabled={loading}
+          startIcon={loading && <CircularProgress size={20} />}
+        >
+          {loading ? 'Submitting...' : 'Submit Vote'}
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={logout}
+        >
+          Logout
+        </Button>
+      </Box>
+    </Container>
   );
 };
 

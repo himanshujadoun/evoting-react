@@ -41,7 +41,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/verify-email" element={<VerificationPage />} />
+            <Route path="/VerifyEmail" element={<VerificationPage />} />
             <Route element={<PrivateRoute />}>
               <Route path="/vote" element={<Vote />} /> {/* Protect Vote route */}
             </Route>
