@@ -6,11 +6,23 @@ export const fetchParties = createAsyncThunk("vote/fetchParties", async () => {
   return response.data;
 });
 
-export const submitVote = createAsyncThunk("vote/submitVote", async ({ userId, partyId }) => {
-  if (!userId || !partyId) throw new Error("User ID and Party ID are required");
-  const response = await HTTP_POST(`${process.env.REACT_APP_API_BASE_URL}/vote`, { userId, partyId });
-  return response.data;
-});
+export const submitVote = createAsyncThunk(
+  "vote/submitVote",
+  async ({ userId, partyId }, { rejectWithValue }) => {
+    try {
+      if (!userId || !partyId) throw new Error("User ID and Party ID are required");
+      const response = await HTTP_POST(`${process.env.REACT_APP_API_BASE_URL}/vote`, { userId, partyId });
+      return response.data;
+    } catch (err) {
+      // Check for custom message from backend
+      if (err.response && err.response.data && err.response.data.message) {
+        return rejectWithValue(err.response.data.message);
+      }
+      // Fallback error
+      return rejectWithValue("An unexpected error occurred during voting.");
+    }
+  }
+);
 
 const voteSlice = createSlice({
   name: "vote",
@@ -23,6 +35,7 @@ const voteSlice = createSlice({
   reducers: {
     resetMessage: (state) => {
       state.message = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -37,11 +50,12 @@ const voteSlice = createSlice({
       })
       .addCase(fetchParties.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message || "Failed to fetch parties.";
       })
       .addCase(submitVote.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.message = null;
       })
       .addCase(submitVote.fulfilled, (state, action) => {
         state.loading = false;
@@ -49,7 +63,7 @@ const voteSlice = createSlice({
       })
       .addCase(submitVote.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       });
   },
 });
